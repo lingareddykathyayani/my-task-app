@@ -7,34 +7,36 @@ st.title("✅ Dead-Simple Tasks")
 
 # 1. Initialize storage
 if 'tasks' not in st.session_state:
-    st.session_state.tasks = [
-        {"name": "Gym", "due": "2026-03-01"},
-        {"name": "Rent", "due": "2026-03-11"}
-    ]
+    st.session_state.tasks = []
 
-# 2. --- Input Section ---
-# FIXED: Added a key so we can clear it later
-task_name = st.text_input("Task name", placeholder="e.g., Water Plants", key="new_task_input")
-days = st.number_input("Repeat every (days)", min_value=1, value=7)
-
-if st.button("Add Task", use_container_width=True):
-    if task_name:
+# 2. --- Callback Function to Add Task and Clear Input ---
+def add_task():
+    # Get values using the keys we assigned to the widgets
+    name = st.session_state.new_task_input
+    days = st.session_state.new_task_days
+    
+    if name:
         due_date = (datetime.now() + timedelta(days=days)).strftime('%Y-%m-%d')
-        st.session_state.tasks.append({"name": task_name, "due": due_date})
-        
-        # FIXED: This clears the input field by resetting the key
-        st.session_state["new_task_input"] = "" 
-        st.rerun() 
+        st.session_state.tasks.append({"name": name, "due": due_date})
+        # Clear the input box by resetting its key
+        st.session_state.new_task_input = ""
     else:
         st.warning("Please enter a task name.")
 
+# 3. --- Input Section ---
+# Assign keys and use the 'on_click' parameter
+st.text_input("Task name", placeholder="e.g., Water Plants", key="new_task_input")
+st.number_input("Repeat every (days)", min_value=1, value=7, key="new_task_days")
+
+st.button("Add Task", use_container_width=True, on_click=add_task)
+
 st.divider()
 
-# 3. --- Your Schedule Section ---
+# 4. --- Your Schedule Section ---
 st.subheader("Your Schedule")
 
 if not st.session_state.tasks:
-    st.info("All caught up! No tasks left.")
+    st.info("No tasks yet! Add one above.")
 
 for index, task in enumerate(st.session_state.tasks):
     col1, col2 = st.columns([4, 1]) 
@@ -45,10 +47,9 @@ for index, task in enumerate(st.session_state.tasks):
             st.session_state.tasks.pop(index)
             st.rerun()
 
-# 4. --- Clear All Section ---
+# 5. --- Clear All Section ---
 if st.session_state.tasks:
     st.write("") 
     if st.button("Clear All Tasks", type="secondary", use_container_width=True):
         st.session_state.tasks = []
         st.rerun()
-
