@@ -32,14 +32,15 @@ st.subheader("Your Schedule")
 if not st.session_state.tasks:
     st.info("All caught up! No tasks left.")
 
-# FIXED: Changed [0, 1] to [1, 5] to provide valid widths
+# SWAPPED: Text on left (col1), Button on right (col2)
 for index, task in enumerate(st.session_state.tasks):
-    col1, col2 = st.columns([1, 5]) 
+    # [4, 1] makes the text column 4 times wider than the button column
+    col1, col2 = st.columns([4, 1]) 
     
     with col1:
+        st.write(f"**{task['name']}** (Due: {task['due']})")
+        
+    with col2:
         if st.button("Done", key=f"btn_{index}"):
             st.session_state.tasks.pop(index)
             st.rerun()
-            
-    with col2:
-        st.write(f"**{task['name']}** (Due: {task['due']})")
