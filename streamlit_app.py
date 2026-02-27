@@ -20,7 +20,7 @@ if st.button("Add Task", use_container_width=True):
     if task_name:
         due_date = (datetime.now() + timedelta(days=days)).strftime('%Y-%m-%d')
         st.session_state.tasks.append({"name": task_name, "due": due_date})
-        st.rerun() # Refresh to show new task immediately
+        st.rerun() 
     else:
         st.warning("Please enter a task name.")
 
@@ -32,15 +32,14 @@ st.subheader("Your Schedule")
 if not st.session_state.tasks:
     st.info("All caught up! No tasks left.")
 
-# Use a copy of the list to avoid errors while deleting
+# FIXED: Changed [0, 1] to [1, 5] to provide valid widths
 for index, task in enumerate(st.session_state.tasks):
-    col1, col2 = st.columns([0, 1]) # Create two columns
+    col1, col2 = st.columns([1, 5]) 
     
     with col1:
-        # Create a unique key for every button using the index
         if st.button("Done", key=f"btn_{index}"):
             st.session_state.tasks.pop(index)
-            st.rerun() # Refresh to remove the item from UI
+            st.rerun()
             
     with col2:
         st.write(f"**{task['name']}** (Due: {task['due']})")
