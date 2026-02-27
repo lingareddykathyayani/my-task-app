@@ -24,6 +24,7 @@ if 'tasks' not in st.session_state:
     st.session_state.tasks = load_tasks()
 
 # --- 3. Add Task Callback ---
+# --- 3. Add Task Callback ---
 def add_task_callback():
     name = st.session_state.new_task_input
     days = st.session_state.new_task_days
@@ -31,12 +32,17 @@ def add_task_callback():
     if name:
         due_date = (datetime.now() + timedelta(days=days)).strftime('%Y-%m-%d')
         st.session_state.tasks.append({"name": name, "due": due_date})
-        # SORTING LOGIC: Sort the list immediately after adding
+        
+        # Sort the list immediately after adding
         st.session_state.tasks = sorted(st.session_state.tasks, key=lambda x: x['due'])
         save_tasks()
+        
+        # FIXED: Clear both the name and the days (resetting days back to 7)
         st.session_state.new_task_input = "" 
+        st.session_state.new_task_days = 7
     else:
         st.warning("Please enter a task name.")
+
 
 # --- 4. Input UI ---
 st.text_input("Task name", placeholder="e.g., Water Plants", key="new_task_input")
