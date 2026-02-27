@@ -1,0 +1,52 @@
+import streamlit as st
+from datetime import datetime, timedelta
+from supabase import create_client
+
+# 1. Update these two lines with your actual Supabase info
+URL = "https://anilezhlkdovashdskit.supabase.co"
+KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFuaWxlemhsa2RvdmFzaGRza2l0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMDkxOTQsImV4cCI6MjA4Nzc4NTE5NH0.dlpRUgcqYelhGZVuiDcNu7GtsBrbMdHH1faGp2g-F8c"
+
+# Initialize connection
+try:
+    supabase = create_client(URL, KEY)
+except Exception as e:
+    st.error(f"Supabase Connection Error: {e}")
+
+st.title("✅ Dead-Simple Tasks")
+
+# 2. Add New Task Form
+with st.form("new_task", clear_on_submit=True):
+    name = st.text_input("Task name (e.g., Water Plants)")
+    freq = st.number_input("Repeat every (days)", min_value=1, value=7)
+    if st.form_submit_button("Add Task"):
+        if name:
+            supabase.table("tasks").insert({
+                "name": name, 
+                "due_date": str(datetime.now().date()), 
+                "days_interval": freq
+            }).execute()
+            st.rerun()
+        else:
+            st.warning("Please enter a task name!")
+
+# 3. List and Complete Tasks
+st.subheader("Your Schedule")
+try:
+    response = supabase.table("tasks").select("*").order("due_date").execute()
+    
+    if not response.data:
+        st.info("No tasks yet. Add one above!")
+    
+    for task in response.data:
+        col1, col2 = st.columns([3, 1])
+        col1.write(f"**{task['name']}** (Due: {task['due_date']})")
+        
+        if col2.button("Done", key=task['id']):
+            # Logic: Push the date forward
+            current_due = datetime.strptime(task['due_date'], "%Y-%m-%d")
+            new_date = current_due + timedelta(days=task['days_interval'])
+            supabase.table("tasks").update({"due_date": str(new_date.date())}).eq("id", task['id']).execute()
+            st.rerun()
+except Exception as e:
+    st.error(f"Database Error: {e}. Did you create the 'tasks' table in Supabase?")
+
