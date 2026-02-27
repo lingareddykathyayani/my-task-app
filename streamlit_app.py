@@ -13,13 +13,17 @@ if 'tasks' not in st.session_state:
     ]
 
 # 2. --- Input Section ---
-task_name = st.text_input("Task name", placeholder="e.g., Water Plants")
+# FIXED: Added a key so we can clear it later
+task_name = st.text_input("Task name", placeholder="e.g., Water Plants", key="new_task_input")
 days = st.number_input("Repeat every (days)", min_value=1, value=7)
 
 if st.button("Add Task", use_container_width=True):
     if task_name:
         due_date = (datetime.now() + timedelta(days=days)).strftime('%Y-%m-%d')
         st.session_state.tasks.append({"name": task_name, "due": due_date})
+        
+        # FIXED: This clears the input field by resetting the key
+        st.session_state["new_task_input"] = "" 
         st.rerun() 
     else:
         st.warning("Please enter a task name.")
@@ -32,7 +36,6 @@ st.subheader("Your Schedule")
 if not st.session_state.tasks:
     st.info("All caught up! No tasks left.")
 
-# Task list with Done buttons on the right
 for index, task in enumerate(st.session_state.tasks):
     col1, col2 = st.columns([4, 1]) 
     with col1:
@@ -44,7 +47,8 @@ for index, task in enumerate(st.session_state.tasks):
 
 # 4. --- Clear All Section ---
 if st.session_state.tasks:
-    st.write("") # Add some space
+    st.write("") 
     if st.button("Clear All Tasks", type="secondary", use_container_width=True):
         st.session_state.tasks = []
         st.rerun()
+
